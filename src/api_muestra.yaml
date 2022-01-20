@@ -1,0 +1,154 @@
+openapi: 3.0.0
+info:
+  description: "Descripción de la API de muestra."
+  version: 1.0.0
+  title: API ficticia
+  contact:
+    email: contacto@pythonista.io
+tags:
+  - name: usuario
+    description: "Operaciones para usuarios registrados."
+servers: 
+  - url:  https://demo.pythonista.io/
+    description: "Servidor de demostración."
+  - url:  https://app.pythonista.io/
+    description: "Servidor productivo."    
+paths:
+  "/usuario/{email}/":
+    get:
+      tags:
+        - usuario
+      summary: "Obtiene los datos del usuario."
+      description: "Obtiene datos de un usuario a partir 
+          de un correo electrónico."
+      parameters:
+        - name: email
+          in: path
+          description: "Correo electrónico del usuario."
+          example: "johndoe@example.com"
+          required: true
+          schema:
+            type: string
+        - name: area
+          in: query
+          description: "Indica el área del negocio."
+          schema:
+             $ref: "#/components/schemas/areasDeNegocio"
+      responses:
+         "200":
+           description: "Operación exitosa."
+           content:
+             application-json:
+               schema:
+                   $ref: "#/components/schemas/datosUsuario"
+         "401":
+           description: "No cuenta con permisos."
+         "404":
+           description: "Recurso no encontrado."
+  "/usuario/notificaciones/{idUsuario}":
+    get:
+      tags:
+        - usuario
+      summary: "Obtiene las notificaciones del usuario."
+      description: "Obtiene los detalles de las notificaciones"
+      parameters:
+        - name: unidadNegocio
+          in: query
+          description: "Indica la unidad de negocio"
+          schema: 
+            $ref: "#/components/schemas/areasDeNegocio"
+        - name: activos
+          in: query
+          schema:
+             type: boolean
+      responses:
+         "200":
+           description: operación exitosa
+           content:
+             application-json:
+                schema:
+                  type: array 
+                  items:
+                    $ref: "#/components/schemas/datosNotificacion"         
+         "401":         
+           description: no cuenta con permisos
+         "404":
+           description: recurso no encontrado
+    post:
+      tags:
+        - usuario
+      summary: "Asigna notificaciones a un usuario."
+      description: "Asigna una o más notificación a un usuario."
+      responses:
+        "200":
+          description: "Operación exitosa."
+        "401":
+          description: "No cuenta con permisos."
+        "404":
+          description: "Recurso no encontrado."
+      requestBody:
+        $ref: "#/components/requestBodies/notificacionIdArray"
+    parameters:
+      - name: idUsuario
+        in: path
+        schema:
+           type: string
+        required: true
+components:
+  requestBodies:
+    notificacionIdArray:
+      content: 
+        application/json:       
+          schema:
+            type: array 
+            items:
+              $ref: "#/components/schemas/datosNotificacion"
+      description: "Datos necesarios para la asignación de notificaciones a un usuario."
+  schemas:
+    areasDeNegocio:
+      type: string
+      enum:
+        - FIN
+        - VEN
+        - OPE
+        - BOD
+    datosNotificacion:
+      type: object
+      properties:
+        idUsuario:
+          type: string
+        idNotificacion:
+          type: string
+        area:
+          $ref: "#/components/schemas/areasDeNegocio"
+    datosUsuario:
+       type: object
+       properties:
+         idUsuario:
+           type: string
+           example: "1234456"
+         nombreUsuario:
+           type: string
+           example: "John Doe"
+         emailUsuario:
+           type: string
+           example: "johndoe@example.com"
+         perfilesUsuario:
+           type: array
+           items:
+             $ref: "#/components/schemas/perfilUsuario"
+         areasDeNegocio:
+           type: array
+           items:
+             $ref: "#/components/schemas/areasDeNegocio"
+    perfilUsuario:
+      type: object
+      properties:
+        perfil: 
+          type: string
+          example: "Supervisor"
+        roles:
+          type: array
+          items: 
+            type: string
+          example: ["creador cuentas", "editor actividades"]
